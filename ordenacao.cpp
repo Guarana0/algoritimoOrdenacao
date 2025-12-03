@@ -2,16 +2,16 @@
 #include <algorithm>
 #include <vector>
 
-// ==========================================================
-// MÉTODOS PRIVADOS (QuickSort e Auxiliares)
-// ==========================================================
+// variáveis globais de contagem
+int trocas = 0;
+int comparacoes = 0;
 
-int Ordenacao::particaoLomuto(std::vector<int>& v, int inicio, int fim, long long& trocas, long long& comparacoes) {
+int Ordenacao::particaoLomuto(std::vector<int>& v, int inicio, int fim) {
     int pivo = v[fim];
     int i = (inicio - 1);
 
     for (int j = inicio; j <= fim - 1; j++) {
-        comparacoes++; // Comparação do if abaixo
+        comparacoes++;
         if (v[j] <= pivo) {
             i++;
             std::swap(v[i], v[j]);
@@ -23,7 +23,7 @@ int Ordenacao::particaoLomuto(std::vector<int>& v, int inicio, int fim, long lon
     return (i + 1);
 }
 
-int Ordenacao::particaoHoare(std::vector<int>& v, int inicio, int fim, long long& trocas, long long& comparacoes) {
+int Ordenacao::particaoHoare(std::vector<int>& v, int inicio, int fim) {
     int pivo = v[inicio];
     int i = inicio - 1;
     int j = fim + 1;
@@ -48,27 +48,23 @@ int Ordenacao::particaoHoare(std::vector<int>& v, int inicio, int fim, long long
     }
 }
 
-void Ordenacao::_quickSortLomuto(std::vector<int>& v, int inicio, int fim, long long& trocas, long long& comparacoes) {
+void Ordenacao::_quickSortLomuto(std::vector<int>& v, int inicio, int fim) {
     if (inicio < fim) {
-        int p = particaoLomuto(v, inicio, fim, trocas, comparacoes);
-        _quickSortLomuto(v, inicio, p - 1, trocas, comparacoes);
-        _quickSortLomuto(v, p + 1, fim, trocas, comparacoes);
+        int p = particaoLomuto(v, inicio, fim);
+        _quickSortLomuto(v, inicio, p - 1);
+        _quickSortLomuto(v, p + 1, fim);
     }
 }
 
-void Ordenacao::_quickSortHoare(std::vector<int>& v, int inicio, int fim, long long& trocas, long long& comparacoes) {
+void Ordenacao::_quickSortHoare(std::vector<int>& v, int inicio, int fim) {
     if (inicio < fim) {
-        int p = particaoHoare(v, inicio, fim, trocas, comparacoes);
-        _quickSortHoare(v, inicio, p, trocas, comparacoes);
-        _quickSortHoare(v, p + 1, fim, trocas, comparacoes);
+        int p = particaoHoare(v, inicio, fim);
+        _quickSortHoare(v, inicio, p);
+        _quickSortHoare(v, p + 1, fim);
     }
 }
 
-// ==========================================================
-// MÉTODOS PÚBLICOS
-// ==========================================================
-
-void Ordenacao::bubbleSort(std::vector<int>& v, long long& trocas, long long& comparacoes) {
+void Ordenacao::bubbleSort(std::vector<int>& v) {
     int n = v.size();
     for (int i = 0; i < n - 1; i++) {
         bool trocou = false;
@@ -84,15 +80,13 @@ void Ordenacao::bubbleSort(std::vector<int>& v, long long& trocas, long long& co
     }
 }
 
-void Ordenacao::insertionSort(std::vector<int>& v, long long& trocas, long long& comparacoes) {
+void Ordenacao::insertionSort(std::vector<int>& v) {
     int n = v.size();
     for (int i = 1; i < n; i++) {
         int chave = v[i];
         int j = i - 1;
 
-        // A comparação v[j] > chave acontece dentro do while
         // Se j >= 0 for falso, não compara v[j].
-        // Lógica simplificada de contagem:
         while (j >= 0) {
             comparacoes++;
             if (v[j] > chave) {
@@ -107,7 +101,7 @@ void Ordenacao::insertionSort(std::vector<int>& v, long long& trocas, long long&
     }
 }
 
-void Ordenacao::selectionSort(std::vector<int>& v, long long& trocas, long long& comparacoes) {
+void Ordenacao::selectionSort(std::vector<int>& v) {
     int n = v.size();
     for (int i = 0; i < n - 1; i++) {
         int min_idx = i;
@@ -123,22 +117,23 @@ void Ordenacao::selectionSort(std::vector<int>& v, long long& trocas, long long&
     }
 }
 
-void Ordenacao::quickSortLomuto(std::vector<int>& v, long long& trocas, long long& comparacoes) {
-    if (!v.empty()) _quickSortLomuto(v, 0, v.size() - 1, trocas, comparacoes);
+void Ordenacao::quickSortLomuto(std::vector<int>& v) {
+    if (!v.empty()) _quickSortLomuto(v, 0, v.size() - 1);
 }
 
-void Ordenacao::quickSortHoare(std::vector<int>& v, long long& trocas, long long& comparacoes) {
-    if (!v.empty()) _quickSortHoare(v, 0, v.size() - 1, trocas, comparacoes);
+void Ordenacao::quickSortHoare(std::vector<int>& v) {
+    if (!v.empty()) _quickSortHoare(v, 0, v.size() - 1);
 }
 
-void Ordenacao::bucketSort(std::vector<int>& v, long long& trocas, long long& comparacoes) {
+void Ordenacao::bucketSort(std::vector<int>& v) {
     if (v.empty()) return;
-
-    // Achar min e max (custo linear, não contaremos como comp de ordenação para simplificar,
-    // ou podemos contar aqui se o professor for rigoroso. Geralmente ignora-se pré-processamento).
+    
+    // Encontrar max e min
     int maxVal = v[0];
     int minVal = v[0];
     for(size_t i=1; i<v.size(); i++) {
+        // Nota: para ser purista, aqui também poderiam contar comparações, 
+        // mas em Bucket Sort geralmente focamos na ordenação interna.
         if(v[i] > maxVal) maxVal = v[i];
         if(v[i] < minVal) minVal = v[i];
     }
@@ -158,13 +153,10 @@ void Ordenacao::bucketSort(std::vector<int>& v, long long& trocas, long long& co
     int index = 0;
     for (auto& balde : baldes) {
         if (!balde.empty()) {
-            // USAR O INSERTION SORT DA CLASSE PARA CONTAR AS MÉTRICAS DO BALDE
-            insertionSort(balde, trocas, comparacoes);
+            insertionSort(balde);
 
             for (int num : balde) {
                 v[index++] = num;
-                // Movimentação de volta ao vetor original não costuma contar como "troca" de comparação,
-                // mas sim cópia. Vamos manter simples.
             }
         }
     }
