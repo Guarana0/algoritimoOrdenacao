@@ -4,8 +4,12 @@
 #include <algorithm>
 #include <random>
 #include <chrono>
-#include <iomanip>
+#include <functional> // Necessário para std::function
 #include "Ordenacao.hpp"
+
+// Variáveis globais 
+extern int trocas;
+extern int comparacoes;
 
 struct Resultados {
     int trocas = 0;
@@ -36,14 +40,13 @@ std::vector<int> gerarVetor(int n, int tipo, int sementeExtra) {
         std::uniform_int_distribution<> dis(0, n - 1);
         int qtdTrocas = (int)(n * 0.10);
         for (int i = 0; i < qtdTrocas; i++) {
-            //serve para respeitar o intervalo de geracao de valores
             std::swap(v[dis(gen)], v[dis(gen)]);
         }
     }
     return v;
 }
 
-// Função genérica de teste
+// Função de teste
 template <typename Func>
 void rodarAlgoritmo(Func algoritmo, const std::vector<int>& vetorOriginal, Resultados& acumulador) {
     std::vector<int> copia = vetorOriginal;
@@ -52,15 +55,19 @@ void rodarAlgoritmo(Func algoritmo, const std::vector<int>& vetorOriginal, Resul
     trocas = 0;
     comparacoes = 0;
 
-    auto inicio = std::chrono::high_resolution_clock::now();
+    using Clock = std::chrono::high_resolution_clock;
+    using TimePoint = Clock::time_point;
+
+    TimePoint inicio = Clock::now();
 
     // 2. Executa o algoritmo
     algoritmo(copia);
 
-    auto fim = std::chrono::high_resolution_clock::now();
+    TimePoint fim = Clock::now();
 
-    // 3. Soma no acumulador convertendo para int
-    acumulador.tempoMs += (int)std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio).count();
+    int duracaoMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(fim - inicio).count();
+
+    acumulador.tempoMs += duracaoMs;
     acumulador.trocas += trocas;
     acumulador.comparacoes += comparacoes;
 }
@@ -73,12 +80,13 @@ int main() {
     tamanhos.push_back(100000);
 
     std::vector<std::string> nomesCenarios;
-    nomesCenarios.push_back("Ordenado"); // tipo 1
-    nomesCenarios.push_back("Inverso"); // tipo 2
-    nomesCenarios.push_back("Aleatorio"); // tipo 3
-    nomesCenarios.push_back("QuaseOrd"); // tipo 4
+    nomesCenarios.push_back("Ordenado");
+    nomesCenarios.push_back("Inverso");
+    nomesCenarios.push_back("Aleatorio");
+    nomesCenarios.push_back("QuaseOrd");
 
-    std::cout << "TAMANHO | CENARIO     | ALGORITMO      | TEMPO(ms) | TROCAS       | COMPARACOES" << std::endl;
+    // Impressão do Cabeçalho
+    std::cout << "TAMANHO | CENARIO | ALGORITMO | TEMPO(ms) | TROCAS | COMPARACOES" << std::endl;
     std::cout << "----------------------------------------------------------------------------------" << std::endl;
 
     for (size_t i = 0; i < tamanhos.size(); ++i) {
@@ -104,17 +112,19 @@ int main() {
                 }
             }
 
-            // Divisor para média (int)
             int totalExecucoes = numVetores * numRepeticoes;
 
-            // setw define largura do campo
-            // ja imprime com a media
-            auto imprimir = [&](std::string nome, Resultados r) {
-                 std::cout << std::left << std::setw(8) << n
-                          << " | " << std::setw(11) << nomesCenarios[tipo]
-                          << " | " << std::setw(14) << nome
-                          << " | " << std::setw(9) << (r.tempoMs / totalExecucoes)
-                          << " | " << std::setw(12) << (r.trocas / totalExecucoes)
+            // Função para imprimir
+            std::function<void(std::string, Resultados)> imprimir =
+                [&](std::string nome, Resultados r) {
+                std::cout << n
+                          << " | " << nomesCenarios[tipo]
+                          << " | " << nome
+                          // faz media
+                          << " | " << (r.tempoMs / totalExecucoes)
+                          // faz media
+                          << " | " << (r.trocas / totalExecucoes)
+                          // faz media
                           << " | " << (r.comparacoes / totalExecucoes) << std::endl;
             };
 
