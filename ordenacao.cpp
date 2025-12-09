@@ -65,10 +65,10 @@ void Ordenacao::_quickSortHoare(std::vector<int>& v, int inicio, int fim) {
 }
 
 void Ordenacao::bubbleSort(std::vector<int>& v) {
-    int n = v.size();
-    for (int i = 0; i < n - 1; i++) {
+    int t = v.size();
+    for (int i = 0; i < t - 1; i++) {
         bool trocou = false;
-        for (int j = 0; j < n - i - 1; j++) {
+        for (int j = 0; j < t - i - 1; j++) {
             comparacoes++;
             if (v[j] > v[j + 1]) {
                 std::swap(v[j], v[j + 1]);
@@ -102,15 +102,15 @@ void Ordenacao::insertionSort(std::vector<int>& v) {
 }
 
 void Ordenacao::selectionSort(std::vector<int>& v) {
-    int n = v.size();
-    for (int i = 0; i < n - 1; i++) {
-        int min_idx = i;
-        for (int j = i + 1; j < n; j++) {
+    int t = v.size();
+    for (int i = 0; i < t - 1; i++) {
+        int min_i = i;
+        for (int j = i + 1; j < t; j++) {
             comparacoes++;
-            if (v[j] < v[min_idx])
-                min_idx = j;
+            if (v[j] < v[min_i])
+                min_i = j;
         }
-        if (min_idx != i) {
+        if (min_i != i) {
             std::swap(v[i], v[min_idx]);
             trocas++;
         }
